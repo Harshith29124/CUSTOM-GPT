@@ -18,8 +18,10 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Use the inference API endpoint (router.huggingface.co redirects here or vice versa)
+    // The error message suggests router, but the /models/ path format works with api-inference
     const response = await fetch(
-      'https://router.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta',
+      'https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta',
       {
         method: 'POST',
         headers: {
@@ -29,8 +31,40 @@ export default async function handler(req, res) {
         body: JSON.stringify(req.body),
       }
     );
-    const data = await response.json();
-    res.status(response.ok ? 200 : response.status).json(data);
+    
+    // Handle response properly - check content type before parsing
+    const contentType = response.headers.get('content-type') || '';
+    let data;
+    
+    if (contentType.includes('application/json')) {
+      const text = await response.text();
+      try {
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        // If JSON parse fails, return the raw text as error
+        res.status(response.status || 500).json({ 
+          error: `Invalid JSON response: ${text.substring(0, 200)}` 
+        });
+        return;
+      }
+    } else {
+      // Non-JSON response (like HTML error page)
+      const text = await response.text();
+      res.status(response.status || 500).json({ 
+        error: text.includes('Not Found') 
+          ? 'Model endpoint not found. Please check the model name and API endpoint.'
+          : `API error: ${text.substring(0, 200)}`
+      });
+      return;
+    }
+    
+    // Return the response
+    if (!response.ok) {
+      res.status(response.status).json(data);
+      return;
+    }
+    
+    res.status(200).json(data);
   } catch (err) {
     res.status(500).json({ error: err.message || 'Internal server error' });
   }
