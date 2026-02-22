@@ -4,7 +4,7 @@
  */
 
 // We use the modern router endpoint for serverless tier compatibility
-const ROUTER_URL = 'https://router.huggingface.co/hf-inference/v1/chat/completions';
+const ROUTER_URL = 'https://router.huggingface.co/v1/chat/completions';
 
 export default async function handler(req, res) {
   // CORS Headers
