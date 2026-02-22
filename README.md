@@ -7,7 +7,7 @@ Production-ready Claude-style AI chat app powered by Hugging Face Zephyr 7B.
 For local testing only, temporarily edit `index.html`:
 
 - Set `API_URL` to the full HF inference URL:  
-  `https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta`
+  `https://router.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta`
 - Set `HF_TOKEN` to your Hugging Face token
 
 **Never commit these changes.**
