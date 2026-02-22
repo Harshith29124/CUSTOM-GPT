@@ -1,17 +1,9 @@
 /**
  * Vercel serverless function: proxies chat requests to Hugging Face.
- *
- * Root cause fix: HF deprecated api-inference.huggingface.co. The supported
- * API is the Inference Providers router at router.huggingface.co, which uses
- * the OpenAI chat-completions format (/v1/chat/completions), not the old
- * "inputs" inference API. We convert between the two so the frontend is unchanged.
- *
- * @see https://huggingface.co/docs/api-inference/index
- * @see https://router.huggingface.co (OpenAI-compatible)
+ * This version supports streaming, multiple models, and full conversation history.
  */
 
-const ROUTER_URL = 'https://router.huggingface.co/v1/chat/completions';
-const MODEL = 'meta-llama/Llama-3.1-8B-Instruct';
+// We use the direct model inference endpoints for maximum free-tier compatibility
 
 export default async function handler(req, res) {
   // CORS Headers
@@ -33,27 +25,34 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { inputs, parameters = {} } = req.body || {};
+    const {
+      messages,
+      model = 'meta-llama/Llama-3.1-8B-Instruct',
+      parameters = {},
+      stream = false
+    } = req.body || {};
 
-    // The frontend sends 'inputs' which is the prompt.
-    // The Router API expects 'messages'.
-    // We also support 'parameters' for backward compatibility.
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ error: 'Missing or invalid messages array' });
+    }
 
-    const prompt = typeof inputs === 'string' ? inputs : '';
-    if (!prompt) {
-      return res.status(400).json({ error: 'Missing input prompt' });
+    let targetModel = model;
+    if (targetModel.includes(':hf-inference')) {
+      targetModel = targetModel.replace(':hf-inference', '');
     }
 
     const payload = {
-      model: MODEL,
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: parameters.max_new_tokens || parameters.max_tokens || 1024,
+      model: targetModel,
+      messages: messages,
+      max_tokens: parameters.max_new_tokens || parameters.max_tokens || 2048,
       temperature: parameters.temperature ?? 0.7,
       top_p: parameters.top_p ?? 0.95,
-      stream: false // Streaming would require a different architecture for serverless
+      stream: stream
     };
 
-    const response = await fetch(ROUTER_URL, {
+    const API_URL = `https://api-inference.huggingface.co/models/${targetModel}/v1/chat/completions`;
+
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -62,38 +61,46 @@ export default async function handler(req, res) {
       body: JSON.stringify(payload),
     });
 
-    const contentType = response.headers.get('content-type') || '';
-
     if (!response.ok) {
-      const errorData = contentType.includes('application/json')
-        ? await response.json()
-        : await response.text();
-
-      const errorMessage = typeof errorData === 'object'
-        ? (errorData.error?.message || errorData.error || JSON.stringify(errorData))
-        : errorData;
-
+      if (response.status === 503) {
+        return res.status(503).json({ error: "Nova is currently initializing this cognitive model. Please retry in 30-60 seconds." });
+      }
+      const errorData = await response.text();
       return res.status(response.status).json({
-        error: errorMessage || `API Error: ${response.status} ${response.statusText}`
+        error: `API Error: ${response.status} - ${errorData.substring(0, 100)}`
       });
     }
 
-    if (!contentType.includes('application/json')) {
-      const text = await response.text();
-      return res.status(500).json({ error: `Unexpected response format from API: ${text.substring(0, 100)}` });
+    // CASE 1: Streaming
+    if (stream) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        res.write(chunk);
+      }
+      return res.end();
     }
 
+    // CASE 2: Normal Response
     const data = await response.json();
-
-    // Extracted content from OpenAI-compatible response
     const generatedText = data.choices?.[0]?.message?.content || '';
 
-    if (!generatedText && !data.error) {
-      return res.status(500).json({ error: 'API returned an empty response' });
-    }
-
-    // Return in the format the legacy frontend expects
-    return res.status(200).json([{ generated_text: generatedText }]);
+    // Maintain legacy format compatibility for now if needed, 
+    // but better to move to standard OpenAI format.
+    // Let's return both for safety.
+    return res.status(200).json({
+      choices: data.choices,
+      generated_text: generatedText // legacy field
+    });
 
   } catch (err) {
     console.error('Proxy Error:', err);
