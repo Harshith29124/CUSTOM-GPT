@@ -11,7 +11,7 @@
  */
 
 const ROUTER_URL = 'https://router.huggingface.co/v1/chat/completions';
-const MODEL = 'HuggingFaceH4/zephyr-7b-beta';
+const MODEL = 'meta-llama/Llama-3.1-8B-Instruct';
 
 export default async function handler(req, res) {
   // CORS Headers
@@ -34,11 +34,11 @@ export default async function handler(req, res) {
 
   try {
     const { inputs, parameters = {} } = req.body || {};
-    
+
     // The frontend sends 'inputs' which is the prompt.
     // The Router API expects 'messages'.
     // We also support 'parameters' for backward compatibility.
-    
+
     const prompt = typeof inputs === 'string' ? inputs : '';
     if (!prompt) {
       return res.status(400).json({ error: 'Missing input prompt' });
@@ -63,17 +63,17 @@ export default async function handler(req, res) {
     });
 
     const contentType = response.headers.get('content-type') || '';
-    
+
     if (!response.ok) {
-      const errorData = contentType.includes('application/json') 
-        ? await response.json() 
+      const errorData = contentType.includes('application/json')
+        ? await response.json()
         : await response.text();
-      
-      const errorMessage = typeof errorData === 'object' 
+
+      const errorMessage = typeof errorData === 'object'
         ? (errorData.error?.message || errorData.error || JSON.stringify(errorData))
         : errorData;
 
-      return res.status(response.status).json({ 
+      return res.status(response.status).json({
         error: errorMessage || `API Error: ${response.status} ${response.statusText}`
       });
     }
@@ -84,12 +84,12 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    
+
     // Extracted content from OpenAI-compatible response
     const generatedText = data.choices?.[0]?.message?.content || '';
-    
+
     if (!generatedText && !data.error) {
-       return res.status(500).json({ error: 'API returned an empty response' });
+      return res.status(500).json({ error: 'API returned an empty response' });
     }
 
     // Return in the format the legacy frontend expects

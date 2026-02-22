@@ -1,13 +1,13 @@
 # Nova AI
 
-Production-ready Claude-style AI chat app powered by Hugging Face Zephyr 7B.
+Production-ready Claude-style AI chat app powered by Meta Llama 3.1 8B.
 
 ## Local Development
 
 For local testing only, temporarily edit `index.html`:
 
 - Set `API_URL` to the full HF inference URL:  
-  `https://router.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta`
+  `https://router.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct`
 - Set `HF_TOKEN` to your Hugging Face token
 
 **Never commit these changes.**
@@ -28,7 +28,7 @@ The `HF_TOKEN` never appears in frontend code. It lives only in Vercel environme
 ## Stack
 
 - Vanilla HTML/CSS/JS (no framework, no build step)
-- Hugging Face Inference API (Zephyr 7B)
+- Hugging Face Inference API (Meta Llama 3.1 8B)
 - Vercel serverless functions
 - marked.js for markdown
 - highlight.js for syntax highlighting
