@@ -476,10 +476,10 @@
               <path d="M4 6h16M4 12h16M4 18h16" />
             </svg></button>
           <select class="model-select" id="modelSelect">
+            <option value="Qwen/Qwen2.5-7B-Instruct">Qwen 2.5 7B (Free Tier)</option>
             <option value="mistralai/Mistral-7B-Instruct-v0.3">Mistral 7B (Free Tier)</option>
             <option value="HuggingFaceH4/zephyr-7b-beta">Zephyr 7B (Free Tier)</option>
             <option value="microsoft/Phi-3-mini-4k-instruct">Phi-3 Mini (Free Tier)</option>
-            <option value="Qwen/Qwen2.5-7B-Instruct">Qwen 2.5 7B (Free Tier)</option>
           </select>
         </div>
         <div class="nav-r">
@@ -526,7 +526,7 @@
         chats: JSON.parse(localStorage.getItem(STORAGE) || '{}'),
         activeId: localStorage.getItem(STORAGE + '_active') || null,
         theme: localStorage.getItem(STORAGE + '_theme') || 'dark',
-        model: localStorage.getItem(STORAGE + '_model') || 'mistralai/Mistral-7B-Instruct-v0.3',
+        model: localStorage.getItem(STORAGE + '_model') || 'Qwen/Qwen2.5-7B-Instruct',
         busy: false
       };
 
