@@ -3,7 +3,8 @@
  * This version supports streaming, multiple models, and full conversation history.
  */
 
-// We use the direct model inference endpoints for maximum free-tier compatibility
+// We use the modern router endpoint for serverless tier compatibility
+const ROUTER_URL = 'https://router.huggingface.co/hf-inference/v1/chat/completions';
 
 export default async function handler(req, res) {
   // CORS Headers
@@ -50,9 +51,7 @@ export default async function handler(req, res) {
       stream: stream
     };
 
-    const API_URL = `https://api-inference.huggingface.co/models/${targetModel}/v1/chat/completions`;
-
-    const response = await fetch(API_URL, {
+    const response = await fetch(ROUTER_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
