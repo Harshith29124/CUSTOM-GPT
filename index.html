@@ -79,7 +79,7 @@
 
     .app {
       display: flex;
-      height: 100vh;
+      height: 100%;
       overflow: hidden;
       position: relative;
     }
@@ -94,25 +94,36 @@
       display: flex;
       flex-direction: column;
       z-index: 100;
-      transition: transform 0.4s var(--ease), margin-left 0.4s var(--ease);
+      transition: transform 0.4s var(--ease), margin-left 0.4s var(--ease), opacity 0.3s;
+      flex-shrink: 0;
     }
 
     .sidebar.hidden {
       margin-left: calc(-1 * var(--sb-w));
+      pointer-events: none;
+      opacity: 0;
     }
 
     @media (max-width: 900px) {
       .sidebar {
         position: fixed;
-        inset: 0 0 0 0;
-        width: 300px;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 280px;
         transform: translateX(-100%);
         margin-left: 0 !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
         box-shadow: 20px 0 50px rgba(0, 0, 0, 0.8);
       }
 
       .sidebar.open {
         transform: translateX(0);
+      }
+
+      .sidebar.hidden {
+        margin-left: 0 !important;
       }
     }
 
@@ -308,18 +319,26 @@
       position: relative;
       background: var(--bg);
       transition: margin-left 0.4s var(--ease);
+      min-width: 0;
+      width: 100%;
     }
 
     .top-bar {
-      height: 72px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 32px;
+      padding: 0 16px;
       z-index: 50;
       background: rgba(5, 5, 5, 0.4);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
+    }
+
+    @media (min-width: 901px) {
+      .top-bar {
+        padding: 0 32px;
+      }
     }
 
     .top-l {
@@ -385,8 +404,14 @@
     /* Hero Landing */
     .welcome-hero {
       text-align: center;
-      padding: 8vh 0 4vh;
+      padding: 40px 0 20px;
       animation: heroEntrance 1.2s var(--ease);
+    }
+
+    @media (min-width: 901px) {
+      .welcome-hero {
+        padding: 8vh 0 4vh;
+      }
     }
 
     @keyframes heroEntrance {
@@ -404,69 +429,114 @@
     }
 
     .hero-glow {
-      font-size: 54px;
-      margin-bottom: 32px;
+      font-size: 44px;
+      margin-bottom: 24px;
       display: inline-block;
       filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.5));
     }
 
     .welcome-hero h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: 52px;
+      font-size: 36px;
       font-weight: 900;
       letter-spacing: -0.05em;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       background: linear-gradient(135deg, #fff 40%, #71717a 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+
+    @media (min-width: 901px) {
+      .welcome-hero h1 {
+        font-size: 52px;
+      }
+
+      .hero-glow {
+        font-size: 54px;
+      }
     }
 
     .welcome-hero p {
       color: var(--txt-dim);
-      font-size: 19px;
+      font-size: 16px;
       max-width: 480px;
-      margin: 0 auto 50px;
-      line-height: 1.6;
+      margin: 0 auto 30px;
+      line-height: 1.5;
+    }
+
+    @media (min-width: 901px) {
+      .welcome-hero p {
+        font-size: 19px;
+        margin-bottom: 50px;
+      }
     }
 
     .suggest-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
+      grid-template-columns: 1fr;
+      gap: 12px;
       max-width: 720px;
       margin: 0 auto;
+    }
+
+    @media (min-width: 600px) {
+      .suggest-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
     }
 
     .suggest-item {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border);
-      padding: 24px;
-      border-radius: 20px;
+      padding: 16px;
+      border-radius: 16px;
       text-align: left;
       cursor: pointer;
       transition: 0.3s var(--ease);
     }
 
+    @media (min-width: 901px) {
+      .suggest-item {
+        padding: 24px;
+        border-radius: 20px;
+      }
+    }
+
     .suggest-item:hover {
       background: rgba(255, 255, 255, 0.06);
       border-color: var(--accent);
-      transform: translateY(-6px);
+      transform: translateY(-4px);
       box-shadow: var(--shadow-premium);
     }
 
     .suggest-item .emoji {
-      font-size: 22px;
-      margin-bottom: 16px;
+      font-size: 18px;
+      margin-bottom: 12px;
       display: block;
     }
 
+    @media (min-width: 901px) {
+      .suggest-item .emoji {
+        font-size: 22px;
+        margin-bottom: 16px;
+      }
+    }
+
     .suggest-item .label {
-      font-size: 15px;
+      font-size: 14px;
       color: var(--txt-dim);
       font-weight: 600;
       line-height: 1.4;
       transition: 0.2s;
+    }
+
+    @media (min-width: 901px) {
+      .suggest-item .label {
+        font-size: 15px;
+      }
     }
 
     .suggest-item:hover .label {
@@ -593,7 +663,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 0 32px 40px;
+      padding: 0 16px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -601,19 +671,10 @@
       z-index: 60;
     }
 
-    .input-dock {
-      width: 100%;
-      max-width: 860px;
-      background: var(--input-bg);
-      backdrop-filter: var(--glass);
-      border: 1px solid var(--border-bright);
-      border-radius: 28px;
-      padding: 12px 14px 12px 24px;
-      display: flex;
-      align-items: flex-end;
-      gap: 14px;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-      transition: 0.4s var(--ease);
+    @media (min-width: 901px) {
+      .dock-wrap {
+        padding: 0 32px 40px;
+      }
     }
 
     .input-dock:focus-within {
@@ -1037,7 +1098,8 @@
 
       function showChat(id) {
         if (!id || !state.chats[id]) return;
-        state.activeChatId = id; persist();
+        state.activeChatId = id;
+        persist();
         const chat = state.chats[id];
         welcome.style.display = chat.messages.length > 0 ? 'none' : 'block';
         msgsList.innerHTML = '';
@@ -1089,7 +1151,8 @@
         if (!chat || idx <= 0) return;
         const userMsg = chat.messages[idx - 1];
         chat.messages = chat.messages.slice(0, idx);
-        persist(); showChat(chatId);
+        persist();
+        showChat(chatId);
         executeCommunication(chatId, userMsg.content);
       }
 
@@ -1212,22 +1275,52 @@
           row.querySelector('.ci-del').onclick = (e) => {
             e.stopPropagation();
             const id = row.dataset.id;
-            delete state.chats[id]; persist();
+            delete state.chats[id];
+            persist();
             if (state.activeChatId === id) {
               const keys = Object.keys(state.chats);
               if (keys.length) showChat(keys[0]);
-              else { state.activeChatId = null; welcome.style.display = 'block'; msgsList.innerHTML = ''; renderSidebar(); }
+              else {
+                state.activeChatId = null;
+                welcome.style.display = 'block';
+                msgsList.innerHTML = '';
+                renderSidebar();
+              }
             } else renderSidebar();
           };
         });
       }
 
+      function setSidebar(show) {
+        if (window.innerWidth <= 900) {
+          if (show) {
+            sidebar.classList.add('open');
+            overlay.classList.add('visible');
+          } else {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('visible');
+          }
+        } else {
+          if (show) {
+            sidebar.classList.remove('hidden');
+          } else {
+            sidebar.classList.add('hidden');
+          }
+        }
+      }
+
       // Events
-      btnNewChat.onclick = createChat;
-      btnSbToggle.onclick = () => sidebar.classList.toggle('hidden');
-      btnCloseSb.onclick = () => sidebar.classList.add('hidden');
-      btnHam.onclick = () => { sidebar.classList.add('open'); overlay.classList.add('visible'); };
-      overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('visible'); };
+      btnNewChat.onclick = () => {
+        createChat();
+        setSidebar(false);
+      };
+      btnSbToggle.onclick = () => {
+        const isHidden = sidebar.classList.contains('hidden');
+        setSidebar(isHidden);
+      };
+      btnCloseSb.onclick = () => setSidebar(false);
+      btnHam.onclick = () => setSidebar(true);
+      overlay.onclick = () => setSidebar(false);
 
       inputText.oninput = () => {
         btnSend.disabled = !inputText.value.trim() || state.isGenerating;
